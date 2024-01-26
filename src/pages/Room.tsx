@@ -26,9 +26,9 @@ const DEFAULT_TIMER: Timer = {
   expiration: 0,
   running: false,
   session: 0,
-  focus: 25, // * 60,
-  break: 5, // * 60,
-  longBreak: 15, // * 60,
+  focus: 25 * 60,
+  break: 5 * 60,
+  longBreak: 15 * 60,
 };
 
 const CORRECTION_FACTOR = 1100;
