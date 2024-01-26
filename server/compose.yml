@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  y-websocket:
+    container_name: y-websocket
+    image: node:alpine
+    environment:
+      - HOST=0.0.0.0
+      - PORT=12345
+    command: npx y-websocket
+    restart: unless-stopped
+    ports:
+      - "12345:12345"
