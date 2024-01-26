@@ -3,9 +3,8 @@ import ReactDOM from "react-dom/client";
 import { ChakraProvider } from "@chakra-ui/react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Room from "./pages/Room";
-
-import "@fontsource/azeret-mono";
 import Root from "./pages/Root";
+import "./main.css";
 
 const router = createBrowserRouter([
   {

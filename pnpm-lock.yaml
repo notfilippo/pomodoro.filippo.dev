@@ -14,9 +14,6 @@ dependencies:
   "@emotion/styled":
     specifier: ^11.11.0
     version: 11.11.0(@emotion/react@11.11.3)(@types/react@18.2.48)(react@18.2.0)
-  "@fontsource/azeret-mono":
-    specifier: ^5.0.18
-    version: 5.0.18
   framer-motion:
     specifier: ^11.0.3
     version: 11.0.3(react-dom@18.2.0)(react@18.2.0)
@@ -2010,13 +2007,6 @@ packages:
       }
     engines: { node: ^12.22.0 || ^14.17.0 || >=16.0.0 }
     dev: true
-
-  /@fontsource/azeret-mono@5.0.18:
-    resolution:
-      {
-        integrity: sha512-gTgOP1Kq0ZIXy0nkPOk2/35yyvx+XBlhfUWCfzPCo6z/RfM9dJQmvnVGm/Ds8Fa7c2lbL3DLB+RfsYQ1XIMVOQ==,
-      }
-    dev: false
 
   /@humanwhocodes/config-array@0.11.14:
     resolution:

@@ -33,6 +33,28 @@ const DEFAULT_TIMER: Timer = {
 
 const CORRECTION_FACTOR = 1100;
 
+function notify(text: string) {
+  if (!("Notification" in window)) {
+    return;
+  }
+
+  const notification = () =>
+    new Notification("Pomodoro", {
+      icon: "/notification.png",
+      body: text,
+    });
+
+  if (Notification.permission === "granted") {
+    notification();
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        notification();
+      }
+    });
+  }
+}
+
 function getSessionTime(timer: Readonly<Timer> | null): number {
   if (!timer) return 0;
 
@@ -123,6 +145,7 @@ export default function Room() {
       expiration,
       running: true,
     }));
+    notify("Timer started");
   };
 
   const resetTimer = () => {
@@ -131,6 +154,7 @@ export default function Room() {
       expiration: 0,
       running: false,
     }));
+    notify("Timer reset");
   };
 
   const stopAndAdvance = useCallback(() => {
@@ -140,6 +164,7 @@ export default function Room() {
       expiration: 0,
       running: false,
     }));
+    notify("Timer finished");
   }, [updateTimer]);
 
   const tick = useCallback(() => {
@@ -166,7 +191,7 @@ export default function Room() {
         <Text>
           {getSessionName(timer)} ({timer.session})
         </Text>
-        <Text fontSize="6xl" fontFamily="'Azeret Mono', monospace">
+        <Text fontSize="6xl" className="timer">
           {minutes.toString().padStart(2, "0")}:
           {seconds.toString().padStart(2, "0")}
         </Text>
