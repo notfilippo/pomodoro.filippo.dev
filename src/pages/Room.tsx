@@ -43,7 +43,7 @@ export default function Room() {
     () => ({
       id: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
       color: randomColor(),
-      username,
+      username
     }),
     [username],
   );
@@ -193,12 +193,14 @@ export default function Room() {
             </Button>
           </Tooltip>
         </ButtonGroup>
-        <List mt={4}>
+        <List mt={4} textAlign="center">
           {users.map((user) => (
             <ListItem key={user.username} style={{ color: user.color }}>
               {user.username}{" "}
               {user.username === me.username && (
-                <Link onClick={editUsername}>(you)</Link>
+                <Link color="gray" onClick={editUsername}>
+                  (you)
+                </Link>
               )}
             </ListItem>
           ))}
