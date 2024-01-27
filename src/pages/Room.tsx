@@ -12,72 +12,17 @@ import {
 
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
-
-type Timer = {
-  expiration: number;
-  running: boolean;
-  session: number;
-  focus: number;
-  break: number;
-  longBreak: number;
-};
-
-const DEFAULT_TIMER: Timer = {
-  expiration: 0,
-  running: false,
-  session: 0,
-  focus: 25 * 60,
-  break: 5 * 60,
-  longBreak: 15 * 60,
-};
+import Worker from "../worker?worker";
+import {
+  DEFAULT_TIMER,
+  Pomodoro,
+  getSessionName,
+  getSessionTime,
+} from "../lib/pomodoro";
 
 const CORRECTION_FACTOR = 1100;
 
-function notify(text: string) {
-  if (!("Notification" in window)) {
-    return;
-  }
-
-  const notification = () =>
-    new Notification("Pomodoro", {
-      icon: "/notification.png",
-      body: text,
-    });
-
-  if (Notification.permission === "granted") {
-    notification();
-  } else if (Notification.permission !== "denied") {
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        notification();
-      }
-    });
-  }
-}
-
-function getSessionTime(timer: Readonly<Timer> | null): number {
-  if (!timer) return 0;
-
-  if ((timer.session + 1) % 4 === 0) {
-    return timer.longBreak;
-  } else if ((timer.session + 1) % 2 === 0) {
-    return timer.break;
-  }
-
-  return timer.focus;
-}
-
-function getSessionName(timer: Readonly<Timer> | null): string {
-  if (!timer) return "Focus";
-
-  if ((timer.session + 1) % 4 === 0) {
-    return "Long Break";
-  } else if ((timer.session + 1) % 2 === 0) {
-    return "Break";
-  }
-
-  return "Focus";
-}
+const worker = new Worker();
 
 export default function Room() {
   const { id } = useParams();
@@ -87,6 +32,10 @@ export default function Room() {
 
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    worker.postMessage({ timer });
+  }, [timer]);
 
   useEffect(() => {
     if (!id) return;
@@ -122,7 +71,7 @@ export default function Room() {
   }, [forceUpdate]);
 
   const updateTimer = useCallback(
-    (fn: (timer: Timer) => Timer) => {
+    (fn: (timer: Pomodoro) => Pomodoro) => {
       setTimer((timer) => {
         const updatedTimer = fn(timer);
         ytimer?.set("expiration", updatedTimer.expiration);
@@ -145,7 +94,6 @@ export default function Room() {
       expiration,
       running: true,
     }));
-    notify("Timer started");
   };
 
   const resetTimer = () => {
@@ -154,7 +102,6 @@ export default function Room() {
       expiration: 0,
       running: false,
     }));
-    notify("Timer reset");
   };
 
   const stopAndAdvance = useCallback(() => {
@@ -164,7 +111,6 @@ export default function Room() {
       expiration: 0,
       running: false,
     }));
-    notify("Timer finished");
   }, [updateTimer]);
 
   const tick = useCallback(() => {
