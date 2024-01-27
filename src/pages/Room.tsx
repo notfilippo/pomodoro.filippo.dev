@@ -30,9 +30,12 @@ const CORRECTION_FACTOR = 1100;
 const worker = new Worker();
 
 type UserState = {
+  id: number;
   username: string;
   color: string;
 };
+
+const ydoc = new Y.Doc();
 
 export default function Room() {
   const { id } = useParams();
@@ -62,7 +65,6 @@ export default function Room() {
 
   useEffect(() => {
     if (!id) return;
-    const ydoc = new Y.Doc();
 
     console.log("connecting to", import.meta.env.VITE_WEBSOCKET_PROVIDER);
     const yprovider = new WebsocketProvider(
@@ -151,14 +153,17 @@ export default function Room() {
   const tick = useCallback(() => {
     if (!timer) return;
 
-    const remaining = timer.expiration - Date.now();
+    let remaining = (timer.expiration - Date.now()) / 1000;
 
-    setMinutes(Math.max(Math.floor((remaining / 1000 / 60) % 60), 0));
-    setSeconds(Math.max(Math.floor((remaining / 1000) % 60), 0));
-
-    if (remaining <= 0 && timer.running) {
-      stopAndAdvance();
+    if (remaining < 0) {
+      if (timer.running) {
+        stopAndAdvance();
+      }
+      remaining = getSessionTime(timer);
     }
+
+    setMinutes(Math.max(Math.floor((remaining / 60) % 60), 0));
+    setSeconds(Math.max(Math.floor(remaining % 60), 0));
   }, [timer, stopAndAdvance]);
 
   useEffect(() => {
@@ -194,11 +199,11 @@ export default function Room() {
           </Tooltip>
         </ButtonGroup>
       </Flex>
-      <List p={4} textAlign="right" position="absolute" top="0" right="0">
+      <List p={4} position="absolute" bottom="0" left="0">
         {users.map((user) => (
           <ListItem key={user.username} style={{ color: user.color }}>
             {user.username}{" "}
-            {user.username === me.username && (
+            {user.id === me.id && (
               <Link color="gray" onClick={editUsername}>
                 (you)
               </Link>
