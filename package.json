@@ -14,9 +14,11 @@
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "framer-motion": "^11.0.3",
+    "random-word-slugs": "^0.1.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.3",
+    "usehooks-ts": "^2.10.0",
     "y-webrtc": "^10.3.0",
     "y-websocket": "^1.5.3",
     "yjs": "^13.6.11"

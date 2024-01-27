@@ -1,11 +1,14 @@
 import { useParams } from "react-router-dom";
 
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import {
   Button,
   ButtonGroup,
   Center,
   Flex,
+  Link,
+  List,
+  ListItem,
   Text,
   Tooltip,
 } from "@chakra-ui/react";
@@ -19,13 +22,33 @@ import {
   getSessionName,
   getSessionTime,
 } from "../lib/pomodoro";
+import { randomColor, randomUsername } from "../lib/awareness";
+import { useLocalStorage } from "usehooks-ts";
 
 const CORRECTION_FACTOR = 1100;
 
 const worker = new Worker();
 
+type UserState = {
+  username: string;
+  color: string;
+};
+
 export default function Room() {
   const { id } = useParams();
+
+  const [username, setUsername] = useLocalStorage("username", randomUsername());
+
+  const me = useMemo(
+    () => ({
+      id: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER),
+      color: randomColor(),
+      username,
+    }),
+    [username],
+  );
+
+  const [users, setUsers] = useState<UserState[]>([]);
 
   const [ytimer, setYTimer] = useState<Y.Map<unknown> | null>(null);
   const [timer, setTimer] = useState({ ...DEFAULT_TIMER });
@@ -54,6 +77,18 @@ export default function Room() {
       setTimer({ ...DEFAULT_TIMER, ...ytimer.toJSON() });
     });
 
+    yprovider.awareness.setLocalState(me);
+
+    yprovider.awareness.on("change", () => {
+      setUsers(
+        Array.from(yprovider.awareness.getStates().values()).map((user) => ({
+          id: user.id,
+          username: user.username,
+          color: user.color,
+        })),
+      );
+    });
+
     setYTimer(ytimer);
 
     return () => {
@@ -61,7 +96,7 @@ export default function Room() {
       ydoc.destroy();
       setYTimer(null);
     };
-  }, [id]);
+  }, [id, me]);
 
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
@@ -131,6 +166,13 @@ export default function Room() {
     return () => clearInterval(interval);
   }, [tick]);
 
+  const editUsername = () => {
+    const newUsername = prompt("New username", me.username);
+    if (newUsername) {
+      setUsername(newUsername);
+    }
+  };
+
   return (
     <Center h="100vh">
       <Flex direction="column" alignItems="center" gap={2}>
@@ -151,6 +193,16 @@ export default function Room() {
             </Button>
           </Tooltip>
         </ButtonGroup>
+        <List mt={4}>
+          {users.map((user) => (
+            <ListItem key={user.username} style={{ color: user.color }}>
+              {user.username}{" "}
+              {user.username === me.username && (
+                <Link onClick={editUsername}>(you)</Link>
+              )}
+            </ListItem>
+          ))}
+        </List>
       </Flex>
     </Center>
   );
